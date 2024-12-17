@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
         // Use environment variables if arguments are missing
         host = getenv("TFTP_HOST");
         file = getenv("TFTP_FILE");
-
+        // Conditional statement for host, file
         if (!host || !file) {
             printf("Usage: %s <host> <file>\n", argv[0]);
             printf("Or set environment variables TFTP_HOST and TFTP_FILE.\n");
