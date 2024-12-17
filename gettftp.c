@@ -2,14 +2,19 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {  // Vérifie si 2 arguments sont passés
+    // Vérification du nombre d'arguments
+    if (argc != 3) {
         printf("Usage: %s <host> <file>\n", argv[0]);
-        return 1;
+        return 1;  // Retourne une erreur si les arguments sont manquants
     }
 
+    // Récupération des arguments
     char *host = argv[1];
     char *file = argv[2];
 
-    printf("Host: %s, File: %s\n", host, file);
-    return 0;
+    // Affichage des arguments pour validation
+    printf("Host: %s\n", host);
+    printf("File: %s\n", file);
+
+    return 0;  
 }
