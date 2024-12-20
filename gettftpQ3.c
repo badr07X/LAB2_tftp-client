@@ -6,6 +6,17 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+
+int create_socket() {   
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+    return sockfd;
+}
+
+
 int main(int argc, char *argv[]) {
     // Variables to store host and file
     char *host;
@@ -33,6 +44,7 @@ int main(int argc, char *argv[]) {
     // Structure to store address information
     struct addrinfo hints, *res, *p;
     int status;
+    int sockfd;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;  // Support IPv4 and IPv6
@@ -50,6 +62,18 @@ int main(int argc, char *argv[]) {
         void *addr;
         char ipstr[INET6_ADDRSTRLEN];
 
+        //Create socket
+
+        sockfd = create_socket();
+
+        // Bind the socket to the resolved address
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            perror("connect");
+            close(sockfd);
+            continue;
+        }
+
         // Get pointer to the address (IPv4 or IPv6)
         if (p->ai_family == AF_INET) {  // IPv4
             struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
@@ -62,10 +86,20 @@ int main(int argc, char *argv[]) {
         // Convert address to readable string
         inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
         printf("  %s\n", ipstr);
+
+        break;
+    }
+    if (p == NULL) {
+        fprintf(stderr, "Failed to connect\n");
+        return 2;
     }
 
     // Free the memory allocated by getaddrinfo
     freeaddrinfo(res);
+
+    // Close the socket when done
+    close(sockfd);
+
 
     return 0;  // Successful execution
 }
