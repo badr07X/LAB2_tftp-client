@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+
 
 
 #define TFTP_PORT 1069
@@ -52,18 +54,22 @@ void send_ack(int sockfd, struct sockaddr *server_addr, socklen_t server_addr_le
 int main(int argc, char *argv[]) {
     // Variables to store host and file
     char *host;
-    char *file;
-
+    char *filename;
+    char buffer[BUFFER_SIZE];
+    unsigned short block_number = 0;
+    ssize_t recv_len;
+    int sockfd;
+    
     // Check if arguments are passed
     if (argc >= 3) {
         host = argv[1];  // First argument: host
-        file = argv[2];  // Second argument: file
+        filename = argv[2];  // Second argument: file
     } else {
         // Use environment variables if arguments are missing
         host = getenv("TFTP_HOST");
-        file = getenv("TFTP_FILE");
+        filename = getenv("TFTP_FILE");
 
-        if (!host || !file) {
+        if (!host || !filename) {
             printf("Usage: %s <host> <file>\n", argv[0]);
             printf("Or set environment variables TFTP_HOST and TFTP_FILE.\n");
             return 1;
@@ -71,21 +77,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Display the base information
-    printf("Resolving host: %s, File: %s\n", host, file);
+    printf("Resolving host: %s, File: %s\n", host, filename);
 
     // Structure to store address information
     struct addrinfo hints, *res, *p;
     int status;
-    int sockfd;
-    unsigned short block_number = 0;
-    ssize_t recv_len;
+ 
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;  // Support IPv4 and IPv6
     hints.ai_socktype = SOCK_DGRAM;  // Use UDP for TFTP
 
     // Resolve the host address
-    if ((status = getaddrinfo(host, NULL, &hints, &res)) != 0) {
+    if ((status = getaddrinfo(host, "1069", &hints, &res)) != 0) {
         perror("getaddrinfo");
         return EXIT_FAILURE;
     }
